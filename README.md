@@ -8,7 +8,7 @@ This code is heavily inspired by the implementations in kubectl, fission, and he
 * https://github.com/kubernetes/kubernetes/blob/master/pkg/kubectl/cmd/portforward.go
 * https://github.com/fission/fission/blob/master/fission/portforward/portforward.go
 
-See [godoc.org](https://godoc.org/github.com/justinbarrick/go-k8s-portforward) for full documentation.
+See [godoc.org](https://godoc.org/elig-salt/go-k8s-portforward/go-k8s-portforward) for full documentation.
 
 # Example
 
@@ -20,21 +20,28 @@ package main
 import (
 	"log"
 	"time"
-	"github.com/justinbarrick/go-k8s-portforward"
+	portforward "elig-salt/go-k8s-portforward/go-k8s-portforward"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func main() {
-	pf, err := portforward.NewPortForwarder("default", metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			"app": "nginx",
-		},
-	}, 80)
+    namespace := "default"
+	port := 8080
+	listenPort := 9000
+    labels := map[string]string{ "app": "hello-world" }
+
+	pf, err := portforward.NewPortForwarder(namespace, metav1.LabelSelector{
+		MatchLabels: labels,
+	}, port)
 	if err != nil {
 		log.Fatal("Error setting up port forwarder: ", err)
 	}
+	pf.Name = pod
+	pf.ListenPort = listenPort
 
-	err = pf.Start()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	err = pf.Start(ctx)
 	if err != nil {
 		log.Fatal("Error starting port forward: ", err)
 	}

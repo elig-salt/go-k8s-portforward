@@ -3,8 +3,11 @@ package portforward
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
+	"net"
+	"net/http"
+
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -15,8 +18,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"net"
-	"net/http"
 )
 
 // Used for creating a port forward into a Kubernetes pod
@@ -103,8 +104,6 @@ func (p *PortForward) Start(ctx context.Context) error {
 	case <-readyChan:
 		return nil
 	}
-
-	return nil
 }
 
 // Stop a port forward.

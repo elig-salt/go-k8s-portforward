@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
 	"time"
 
-	"github.com/justinbarrick/go-k8s-portforward"
+	portforward "github.com/elig-salt/go-k8s-portforward"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -53,7 +57,9 @@ func main() {
 	pf.Name = pod
 	pf.ListenPort = listenPort
 
-	err = pf.Start()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	err = pf.Start(ctx)
 	if err != nil {
 		log.Fatal("Error starting port forward: ", err)
 	}
