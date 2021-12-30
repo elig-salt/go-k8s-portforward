@@ -40,12 +40,14 @@ func main() {
 	var namespace string
 	var port int
 	var listenPort int
+	var allowMultiple bool
 
 	flag.Var(&labels, "label", "pod labels to look for")
 	flag.IntVar(&listenPort, "listen", 0, "port to bind to, random if 0")
 	flag.IntVar(&port, "port", 80, "port to forward to")
 	flag.StringVar(&pod, "pod", "", "pod name")
 	flag.StringVar(&namespace, "namespace", "default", "namespace to look for the pod in")
+	flag.BoolVar(&allowMultiple, "allow-multiple", false, "If set to true - will pick up the first pod (in case there are multiple ones)")
 	flag.Parse()
 
 	pf, err := portforward.NewPortForwarder(namespace, metav1.LabelSelector{
@@ -56,6 +58,7 @@ func main() {
 	}
 	pf.Name = pod
 	pf.ListenPort = listenPort
+	pf.AllowMultiplePods = allowMultiple
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

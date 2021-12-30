@@ -39,6 +39,10 @@ type PortForward struct {
 	Namespace string
 	stopChan  chan struct{}
 	readyChan chan struct{}
+
+	// Setting this to true won't cause an error if multiple pods exist
+	// but rather port-forward to the first one it sees
+	AllowMultiplePods bool
 }
 
 // Initialize a port forwarder, loads the Kubernetes configuration file and creates the client.
@@ -196,7 +200,7 @@ func (p *PortForward) findPodByLabels(ctx context.Context) (string, error) {
 		return "", errors.New(fmt.Sprintf("Could not find running pod for selector: labels \"%s\"", formatted))
 	}
 
-	if len(pods.Items) != 1 {
+	if !p.AllowMultiplePods && len(pods.Items) != 1 {
 		return "", errors.New(fmt.Sprintf("Ambiguous pod: found more than one pod for selector: labels \"%s\"", formatted))
 	}
 
